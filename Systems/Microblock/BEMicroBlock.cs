@@ -52,7 +52,7 @@ namespace Vintagestory.GameContent
 
             var shape = be.GenShape();
             var text = JsonUtil.ToPrettyString<Shape>(shape);
-            text = 
+            text =
                 text
                 .Replace("Textures", "textures")
                 .Replace("Elements", "elements")
@@ -178,9 +178,9 @@ namespace Vintagestory.GameContent
                         block.Textures.TryGetValue("all", out ctex);
                     }
 
-                    shape.Textures[texCode] = ctex.Base.Path.Replace("*","1");
+                    shape.Textures[texCode] = ctex.Base.Path.Replace("*", "1");
 
-                    elem.Faces[facing.Code] = new ShapeElementFace() { Texture = texCode, Uv = new float[4] { 0,0,16,16 } };
+                    elem.Faces[facing.Code] = new ShapeElementFace() { Texture = texCode, Uv = new float[4] { 0, 0, 16, 16 } };
                 }
 
 #pragma warning restore CS0618
@@ -379,9 +379,10 @@ namespace Vintagestory.GameContent
         {
             base.GetBlockInfo(forPlayer, dsc);
 
-            
-            if (BlockName?.IndexOf('\n') > 0) {
-                dsc.AppendLine(Lang.Get(BlockName.Substring(BlockName.IndexOf('\n') + 1))); 
+
+            if (BlockName?.IndexOf('\n') > 0)
+            {
+                dsc.AppendLine(Lang.Get(BlockName.Substring(BlockName.IndexOf('\n') + 1)));
             }
             else
             {
@@ -1044,7 +1045,8 @@ namespace Vintagestory.GameContent
 
                 selectionBoxesStd = selectionBoxesStdTmp.Where(ele => ele != null).ToArray();
                 selectionBoxesMetaMode = selBoxesMetaModeTmp.ToArray();
-            } else
+            }
+            else
             {
                 for (int i = 0; i < VoxelCuboids.Count; i++)
                 {
@@ -1371,7 +1373,7 @@ namespace Vintagestory.GameContent
                 var material = (VoxelCuboids[j] >> 24) & 0xFFu;
                 if (material >= index)
                 {
-                    VoxelCuboids[j] = (uint)((VoxelCuboids[j] & ~(255 << 24)) | ((material-1) << 24));
+                    VoxelCuboids[j] = (uint)((VoxelCuboids[j] & ~(255 << 24)) | ((material - 1) << 24));
                 }
             }
         }
@@ -1445,7 +1447,7 @@ namespace Vintagestory.GameContent
                 if (DecorIdsRotated == null || DecorIdsRotated.Length < DecorIds.Length) DecorIdsRotated = new int[DecorIds.Length];
                 for (var i = 0; i < 4; i++)
                 {
-                    DecorIdsRotated[i] = DecorIds[GameMath.Mod(i + rotationY/90, 4)];
+                    DecorIdsRotated[i] = DecorIds[GameMath.Mod(i + rotationY / 90, 4)];
                 }
 
                 DecorIdsRotated[4] = DecorIds[4];
@@ -2132,7 +2134,8 @@ namespace Vintagestory.GameContent
                 if (AnyFrostable)
                 {
                     targetMesh.AddColorMapIndex(blockMat.ClimateMapIndex, blockMat.SeasonMapIndex, blockMat.Frostable);
-                } else
+                }
+                else
                 {
                     targetMesh.AddColorMapIndex(blockMat.ClimateMapIndex, blockMat.SeasonMapIndex);
                 }
@@ -2229,22 +2232,22 @@ namespace Vintagestory.GameContent
                 {
                     case 0:
                         u = (uc - 1f) * uSize + 1f - uOffset;
-                        v =       -vc * vSize + 1f - vOffset;
+                        v = -vc * vSize + 1f - vOffset;
                         break;
                     case 1:
                         u = (uc - 1f) * uSize + 1f - uOffset;
-                        v =       -vc * vSize + 1f - vOffset;
+                        v = -vc * vSize + 1f - vOffset;
                         break;
                     case 2:
-                        u =  uc * uSize + uOffset;
+                        u = uc * uSize + uOffset;
                         v = -vc * vSize + 1f - vOffset;
                         break;
                     case 3:
-                        u =  uc * uSize + uOffset;
+                        u = uc * uSize + uOffset;
                         v = -vc * vSize + 1f - vOffset;
                         break;
                     case 4:
-                        u =       -uc * uSize + 1f - uOffset;
+                        u = -uc * uSize + 1f - uOffset;
                         v = (vc - 1f) * vSize + 1f - vOffset;
                         break;
                     case 5:
@@ -2257,10 +2260,10 @@ namespace Vintagestory.GameContent
 
         }
 
-    /// <summary>
-    /// Is coordinate agnostic, can iterate over any of the 6 planes
-    /// </summary>
-    public unsafe ref struct GenPlaneInfo
+        /// <summary>
+        /// Is coordinate agnostic, can iterate over any of the 6 planes
+        /// </summary>
+        public unsafe ref struct GenPlaneInfo
         {
             public RefList<VoxelMaterial> blockMaterials;
             public RefList<VoxelMaterial> decorMaterials;
@@ -2427,7 +2430,7 @@ namespace Vintagestory.GameContent
             }
 
             if (!resolveImports) return;
-            
+
             int newMatIndex = -1;
             int len = BlockIds.Length;
             for (int i = 0; i < len; i++)
@@ -2559,27 +2562,57 @@ namespace Vintagestory.GameContent
         }
     }
 
-
     /// <summary>
-    /// Replaces all uses of bool[,,] arrays in BEMicroblock. Ignoring trivial object overhead, this uses 512 bytes of memory, compared with 4096 or 16384 bytes (depending on native code implementation, see https://stackoverflow.com/questions/28514373/what-is-the-size-of-a-boolean-in-c-does-it-really-take-4-bytes) a bool[,,] of the same length
-    /// Should help to reduce problematic high RAM use of Microblocks
+    /// Compact storage for 4096 bits (16x16x16), occupying exactly 512 bytes of memory.
     /// </summary>
     public class BoolArray16x16x16
     {
-        BitArray voxels;   // Compact storage of boolean values in this nice high-performance class provided by System.Collections - note, suitable for large arrays of bools as we have here; in contrast, our own SmallBoolArray is more suitable for small arrays of bools especially length 6
+        // Array of 64 ulong elements (64 * 64 bits = 4096 bits), allocated only once upon instantiation
+        private readonly ulong[] voxels = new ulong[64];
 
-        public BoolArray16x16x16()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Clear()
         {
-            voxels = new BitArray(16 * 16 * 16);
+            // Instantly zeroes out all 64 elements without creating a new object (zero allocations)
+            Array.Clear(voxels, 0, 64);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Get(int x, int y, int z)
+        {
+            // Calculates flat index and checks the target bit using a fast bitwise AND
+            int index = ((x * 16) + y) * 16 + z;
+            return (voxels[index >> 6] & (1UL << (index & 63))) != 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Set(int x, int y, int z, bool value)
+        {
+            // Calculates index and sets the bit to 1 or 0 via bitwise operations
+            int index = ((x * 16) + y) * 16 + z;
+            if (value)
+                voxels[index >> 6] |= (1UL << (index & 63));
+            else
+                voxels[index >> 6] &= ~(1UL << (index & 63));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetTrue(int x, int y, int z)
+        {
+            // Optimized Set version: forcibly sets the bit to 1 without an 'if' condition check
+            int index = ((x * 16) + y) * 16 + z;
+            voxels[index >> 6] |= (1UL << (index & 63));
+        }
+
+        // Indexer for full backward compatibility with the legacy array[x, y, z] syntax
         public bool this[int x, int y, int z]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return voxels[((x * 16) + y) * 16 + z]; }
+            get => Get(x, y, z);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { voxels[((x * 16) + y) * 16 + z] = value; }
+            set => Set(x, y, z, value);
         }
     }
+
 }
